@@ -6,7 +6,7 @@ import pickle
 def load_base_models():
     ckpt = "/content/gdrive/MyDrive/HairGAN/tam_proposed/sg3-r-ffhq-1024.pt"
     g_ema = Generator(1024, 512, 8)
-    g_ema.load_state_dict(torch.load(ckpt)["g_ema"], strict=False)
+    g_ema.load_state_dict(torch.load(ckpt)["G_ema"], strict=False)
     g_ema.eval()
     g_ema = g_ema.cuda()
 
