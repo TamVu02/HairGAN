@@ -3,14 +3,14 @@ from models.stylegan3.model import Generator
 from models.face_parsing.model import BiSeNet
 import pickle
 
-def load_base_models():
-    ckpt = "/content/gdrive/MyDrive/HairGAN/tam_proposed/stylegan3-t-ffhq-1024x1024.pkl"
-    #g_ema = Generator(1024, 512, 8)
-    with open(ckpt, 'rb') as f:
-        g_ema = pickle.load(f)['G_ema'].cuda()
-        mean_latent = pickle.load(f)['latent_avg'].unsqueeze(0).unsqueeze(0).repeat(1,18,1).clone().detach().cuda()
+def load_base_models(opts):
+    ckpt = "/content/gdrive/MyDrive/HairGAN/tam_proposed/sg3-r-ffhq-1024.pt"
+    g_ema = Generator(1024, 512, 8)
+    g_ema.load_state_dict(torch.load(ckpt)["g_ema"], strict=False)
+    g_ema.eval()
+    g_ema = g_ema.cuda()
 
-    #mean_latent = torch.load(ckpt)["latent_avg"].unsqueeze(0).unsqueeze(0).repeat(1,18,1).clone().detach().cuda()
+    mean_latent = torch.load(ckpt)["latent_avg"].unsqueeze(0).unsqueeze(0).repeat(1,18,1).clone().detach().cuda()
 
     seg_pretrained_path = "/content/gdrive/MyDrive/HairGAN/tam_proposed/seg.pth"
     seg = BiSeNet(n_classes=16)
