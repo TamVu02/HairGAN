@@ -484,7 +484,7 @@ class Generator(nn.Module):
             input_is_latent=False,
             noise=None,
             randomize_noise=True,
-            layer_in=None,
+            layer_in=None, #feature
             skip=None,
             start_layer=0,
             end_layer=8,
@@ -512,7 +512,7 @@ class Generator(nn.Module):
 
             styles = style_t
 
-        if len(styles) < 2:
+        if len(styles) < 2: 
             inject_index = self.n_latent
 
             if styles[0].ndim < 3:
@@ -521,7 +521,7 @@ class Generator(nn.Module):
             else:
                 latent = styles[0]
 
-        else:
+        else: #Style Mixing
             if inject_index is None:
                 inject_index = random.randint(1, self.n_latent - 1)
 
@@ -723,3 +723,4 @@ class Discriminator(nn.Module):
         out = self.final_linear(out)
 
         return out
+
