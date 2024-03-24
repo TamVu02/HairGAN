@@ -50,3 +50,10 @@ def generate_mp4(out_name, images: List[np.ndarray], kwargs):
     for image in images:
         writer.append_data(np.array(image))
     writer.close()
+
+def convert_npy_code(latent):
+    if latent.shape == (16, 512):
+        latent = np.reshape(latent, (1, 16, 512))
+    if latent.shape == (512,) or latent.shape == (1, 512):
+        latent = np.reshape(latent, (1, 1, 512)).repeat(16, axis=1)
+    return latent

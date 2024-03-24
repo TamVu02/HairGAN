@@ -1,10 +1,10 @@
 import torch
-from models.stylegan3.model import Generator
+from models.stylegan2.model import Generator
 from models.face_parsing.model import BiSeNet
-import pickle
+from utils.inference_utils import load_encoder
 
-def load_base_models2():
-    ckpt = "/content/gdrive/MyDrive/HairGAN/tam_proposed/sg3-r-ffhq-1024.pt"
+def load_base_models(opts):
+    ckpt = opts.stylegan_path
     g_ema = Generator(1024, 512, 8)
     g_ema.load_state_dict(torch.load(ckpt)["g_ema"], strict=False)
     g_ema.eval()
@@ -12,7 +12,7 @@ def load_base_models2():
 
     mean_latent = torch.load(ckpt)["latent_avg"].unsqueeze(0).unsqueeze(0).repeat(1,18,1).clone().detach().cuda()
 
-    seg_pretrained_path = "/content/gdrive/MyDrive/HairGAN/tam_proposed/seg.pth"
+    seg_pretrained_path = opts.seg_path
     seg = BiSeNet(n_classes=16)
     seg.load_state_dict(torch.load(seg_pretrained_path), strict=False)
     for param in seg.parameters():
@@ -22,21 +22,15 @@ def load_base_models2():
 
     return g_ema, mean_latent, seg
 
-import torch
-from models.stylegan3.model import Generator
-from models.face_parsing.model import BiSeNet
-import pickle
+def load_sg3_models(opts):
+    generator,opts_sg3 = load_encoder(checkpoint_path=opts.stylegan3_weights,generator_path=opts.generator_path3)
+    # generator = net.decoder
+    # generator.eval()
+    # generator = generator.cuda()
 
-def load_base_models2():
-    ckpt = "/content/gdrive/MyDrive/HairGAN/tam_proposed/sg3-r-ffhq-1024.pt"
-    g_ema = Generator(1024, 512, 8)
-    g_ema.load_state_dict(torch.load(ckpt)["g_ema"], strict=False)
-    g_ema.eval()
-    g_ema = g_ema.cuda()
+    mean_latent = generator.latent_avg.repeat(16, 1).unsqueeze(0).cuda()
 
-    mean_latent = torch.load(ckpt)["latent_avg"].unsqueeze(0).unsqueeze(0).repeat(1,18,1).clone().detach().cuda()
-
-    seg_pretrained_path = "/content/gdrive/MyDrive/HairGAN/tam_proposed/seg.pth"
+    seg_pretrained_path = opts.seg_path
     seg = BiSeNet(n_classes=16)
     seg.load_state_dict(torch.load(seg_pretrained_path), strict=False)
     for param in seg.parameters():
@@ -44,7 +38,4 @@ def load_base_models2():
     seg.eval()
     seg = seg.cuda()
 
-    return g_ema, mean_latent, seg
-
-def load_base_models3():
-    return
+    return generator, opts_sg3, mean_latent, seg

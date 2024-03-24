@@ -11,7 +11,6 @@ from inversion.options.e4e_train_options import e4eTrainOptions
 from inversion.options.test_options import TestOptions
 from inversion.options.train_options import TrainOptions
 from models.stylegan3.model import SG3Generator
-from utils.model_utils_e4e import ENCODER_TYPES
 
 IMAGE_TRANSFORMS = transforms.Compose([
     transforms.Resize((256, 256)),
@@ -34,16 +33,10 @@ def load_encoder(checkpoint_path: Path, test_opts: Optional[TestOptions] = None,
     if opts['stylegan_weights'] == Path(model_paths["stylegan3_ffhq_unaligned"]):
         opts['stylegan_weights'] = Path(model_paths["stylegan3_ffhq_unaligned_pt"])
 
-    if opts["encoder_type"] in ENCODER_TYPES['pSp']:
-        opts = TrainOptions(**opts)
-        if test_opts is not None:
-            opts.update(dataclasses.asdict(test_opts))
-        net = pSp(opts)
-    else:
-        opts = e4eTrainOptions(**opts)
-        if test_opts is not None:
-            opts.update(dataclasses.asdict(test_opts))
-        net = e4e(opts)
+    opts = e4eTrainOptions(**opts)
+    if test_opts is not None:
+        opts.update(dataclasses.asdict(test_opts))
+    net = e4e(opts)
 
     print('Model successfully loaded!')
     if generator_path is not None:
