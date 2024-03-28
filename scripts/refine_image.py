@@ -19,7 +19,6 @@ class RefineProxy(torch.nn.Module):
         self.transfer_loss_builder = TransferLossBuilder()
         self.delta_loss = torch.nn.MSELoss()
         self.landmark_loss = torch.nn.MSELoss()
-        self.kp_extractor = self.load_kp_extractor()
         self.percept_with_mask = masked_lpips.PerceptualLoss(
                 model="net-lin", net="vgg", vgg_blocks=['1', '2', '3'], use_gpu=self.opts.device == 'cuda'
             )
