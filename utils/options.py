@@ -49,7 +49,7 @@ class Options:
 		# arguments for refine proxy
 		self.parser.add_argument('--steps_refine', default=400, type=int, help='Step for reference proxy optimization')
 		self.parser.add_argument('--lr_refine', default=0.01, type=float, help='Learning rate for reference proxy')
-                self.parser.add_argument('--device', default='cuda', type=str)
+		self.parser.add_argument('--device', default='cuda', type=str)
 
 
 	def parse(self, jupyter=False):
