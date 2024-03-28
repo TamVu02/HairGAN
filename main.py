@@ -78,7 +78,7 @@ def main(args):
                                         factor = 5,
                                         user_transforms=None,
                                         apply_user_transformations=False)
-            latent_bald=edit_latents[-1]
+            latent_bald=edit_latents[-1].unsqueeze(0)
 
             #Retrieve 3 random image in image_list
             img_list_alt=args.img_list.copy()
