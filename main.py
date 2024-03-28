@@ -35,7 +35,7 @@ def calculate_ssim_score_skimage(src_tensor, ref_tensor):
 def main(args):
     #Load args
     opts = Options().parse(jupyter=True)
-    opts.FS_steps=500
+    opts.W_steps=500
     opts.steps_ref=200
     opts.steps_refine=500
 
