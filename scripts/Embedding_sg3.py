@@ -64,7 +64,7 @@ class Embedding_sg3(nn.Module):
             latent_in = latent.clone().detach().requires_grad_(True)
             optimizer_W = torch.optim.Adam([latent_in], lr=self.opts.lr_embedding)
             
-            pbar = tqdm(range(self.opts.W_steps), desc='Embedding', leave=False)
+            pbar = tqdm(range(self.opts.W_steps), desc='Embedding', leave=True)
             for step in pbar:
                 optimizer_W.zero_grad()
                 gen_im = self.generator.decoder.synthesis(latent_in, noise_mode='const')
