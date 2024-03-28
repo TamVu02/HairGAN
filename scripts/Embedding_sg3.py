@@ -42,85 +42,47 @@ class Embedding_sg3(nn.Module):
         factor = 1024 // 256
         self.downsample = BicubicDownSample(factor=factor, cuda=True)
 
-
-    def setup_FS_optimizer(self, latent_W, F_init):
-        latent_F = F_init.clone().detach().requires_grad_(True)
-        latent_S = []
-        for i in range(16):
-            tmp = latent_W[0, i].clone()
-            if i < 5:
-                tmp.requires_grad = False
-            else:
-                tmp.requires_grad = True
-            latent_S.append(tmp)
-        optimizer_FS = torch.optim.Adam(latent_S[5:] + [latent_F], lr=self.opts.lr_embedding)
-        return optimizer_FS, latent_F, latent_S
-
     def setup_embedding_loss_builder(self):
         self.loss_builder = EmbeddingLossBuilder(self.opts)
 
-    def invert_image_in_W(self, image_path=None, latent_dir=None,device=None):
+    def invert_image_in_W(self, image_path=None ,device=None):
+        latent_dir = self.opts.latent_dir
         im_name = os.path.splitext(os.path.basename(image_path))[0]
         latent_W_path = os.path.join(latent_dir, f'{im_name}.npy')
-        latent_in=None
+        ref_im = Image.open(image_path).convert('RGB')
+        ref_im_L = self.image_transform(ref_im.resize((256, 256), PIL.Image.LANCZOS)).unsqueeze(0).to('cuda')
+        ref_im_H = self.image_transform(ref_im.resize((1024, 1024), PIL.Image.LANCZOS)).unsqueeze(0)
+        gen_im,latent=None,None
+
         if not os.path.isfile(latent_W_path):
-            ref_im = Image.open(image_path).convert('RGB')
-            ref_im_L = self.image_transform(ref_im.resize((256, 256), PIL.Image.LANCZOS)).unsqueeze(0).to('cuda')
-            gen_im,latent=None,None
-            pbar = tqdm(range(self.opts.SG3_steps), desc='Embedding', leave=False)
-            for step in pbar:
-                if(step==0):
-                    avg_image = get_average_image(self.generator)
-                    avg_image = avg_image.unsqueeze(0).repeat(ref_im_L.shape[0], 1, 1, 1)
-                    x_input = torch.cat([ref_im_L, avg_image], dim=1)
-                else:
-                    gen_im = self.generator.face_pool(gen_im)
-                    x_input = torch.cat([ref_im_L, gen_im], dim=1)
+            with torch.no_grad():
+                avg_image = get_average_image(self.generator)
+                avg_image = avg_image.unsqueeze(0).repeat(ref_im_L.shape[0], 1, 1, 1)
+                x_input = torch.cat([ref_im_L, avg_image], dim=1)
                 gen_im,latent = self.generator(x_input,latent=latent, return_latents=True, resize=False)
-            latent_in=latent
+
+            latent_in = latent.clone().detach().requires_grad_(True)
+            optimizer_W = torch.optim.Adam(latent_in, lr=self.opts.lr_embedding)
+            
+            pbar = tqdm(range(self.opts.W_steps), desc='Embedding', leave=False)
+            for step in pbar:
+                optimizer_W.zero_grad()
+                gen_im = self.generator.decoder.synthesis(latent_in, noise_mode='const')
+                im_dict = {
+                    'ref_im_H': ref_im_H.cuda(),
+                    'ref_im_L': ref_im_L.cuda(),
+                    'gen_im_H': gen_im,
+                    'gen_im_L': self.downsample(gen_im)
+                }
+                loss, loss_dic = self.cal_loss(im_dict, latent_in)
+                loss.backward()
+                optimizer_W.step()
+                pbar.set_description('Embedding: Loss: {:.3f}, L2 loss: {:.3f}, Perceptual loss: {:.3f}, P-norm loss: {:.3f}'\
+                    .format(loss, loss_dic['l2'], loss_dic['percep'], loss_dic['p-norm']))
+            np.save(latent_W_path,latent_in.detach().cpu().numpy())
         else:
             latent_in = torch.from_numpy(convert_npy_code(np.load(latent_W_path))).to(device)
         return latent_in
-
-    def invert_image_in_FS(self, image_path=None):
-        ref_im = Image.open(image_path).convert('RGB')
-        ref_im_L = self.image_transform(ref_im.resize((256, 256), PIL.Image.LANCZOS)).unsqueeze(0)#.to('cuda')
-        ref_im_H = self.image_transform(ref_im.resize((1024, 1024), PIL.Image.LANCZOS)).unsqueeze(0)
-
-        latent_W = self.invert_image_in_W(image_path=image_path, latent_dir=self.opts.latents_path, device='cuda').clone().detach()
-        F_init = self.generator.decoder.synthesis(latent_W, noise_mode='const')
-        optimizer_FS, latent_F, latent_S = self.setup_FS_optimizer(latent_W, F_init)
-
-        gen_im,latent=None,None
-
-        pbar = tqdm(range(self.opts.FS_steps), desc='Embedding', leave=False)
-        for step in pbar:
-            optimizer_FS.zero_grad()
-            latent_in = torch.stack(latent_S).unsqueeze(0)
-            # if(step==0):
-            #     avg_image = self.get_avg_img(self.generator)
-            #     avg_image = avg_image.unsqueeze(0).repeat(ref_im_L.shape[0], 1, 1, 1)
-            #     x_input = torch.cat([ref_im_L, avg_image], dim=1)
-            # else:
-            #     x_input = torch.cat([ref_im_L, gen_im], dim=1)
-            # gen_im,latent = self.generator(x_input,latent=latent_in, return_latents=True, resize=False)
-            gen_im = self.generator.decoder.synthesis(latent_in, noise_mode='const')
-            im_dict = {
-                'ref_im_H': ref_im_H.cuda(),
-                'ref_im_L': ref_im_L.cuda(),
-                'gen_im_H': gen_im,
-                'gen_im_L': self.downsample(gen_im)
-            }
-
-            loss, loss_dic = self.cal_loss(im_dict, latent_in)
-            gen_im = self.generator.face_pool(gen_im).detach().clone()
-            loss.backward()
-            optimizer_FS.step()
-            pbar.set_description(
-                'Embedding: Loss: {:.3f}, L2 loss: {:.3f}, Perceptual loss: {:.3f}, P-norm loss: {:.3f}'
-                .format(loss, loss_dic['l2'], loss_dic['percep'], loss_dic['p-norm']))
-        return latent_in, latent_F
-
 
     def cal_p_norm_loss(self, latent_in):
         latent_p_norm = (torch.nn.LeakyReLU(negative_slope=5)(latent_in) - self.X_mean).bmm(

@@ -3,7 +3,6 @@ from utils.image_utils import dliate_erode
 import torch.nn.functional as F
 from PIL import Image
 from torchvision import transforms
-from scripts.text_proxy import TextProxy
 from utils.common import tensor2im
 from utils.inference_utils import get_average_image
 
@@ -54,16 +53,3 @@ def hairstyle_feature_blending(generator, seg, src_latent, src_feature, src_imag
                  x_input = torch.cat([out, img_gen_blend], dim=1)
             img_gen_blend,latent = generator(x_input,latent=latent, return_latents=True, resize=False)
     return feat_out_img, src_feature, img_gen_blend
-
-def color_feature_blending(generator, seg, edited_hairstyle_img, src_latent, color_latent_in, latent_F):
-    hair_seg = torch.argmax(seg(edited_hairstyle_img)[1], dim=1).unsqueeze(1).long()
-    hari_mask = torch.where(hair_seg==10, torch.ones_like(hair_seg), torch.zeros_like(hair_seg))
-    enlarged_hair_mask_np = dliate_erode(hari_mask[0][0].cpu().numpy().astype('uint8'), 30)
-    enlarged_hair_mask = torch.from_numpy(enlarged_hair_mask_np).unsqueeze(0).unsqueeze(0).cuda()
-    final_hair_mask = F.interpolate(enlarged_hair_mask.float(), size=(1024, 1024)).long().clone().detach()
-
-    source_feature = generator.decoder.synthesis(src_latent, noise_mode='const')#generator.decoder.synthesis([src_latent], input_is_latent=True, randomize_noise=False, return_latents=True, start_layer=4, end_layer=6, layer_in=latent_F)
-    color_feature = generator.decoder.synthesis(color_latent_in, noise_mode='const')#generator.decoder.synthesis([color_latent_in], input_is_latent=True, randomize_noise=False, return_latents=True, start_layer=4, end_layer=6, layer_in=latent_F)
-    final_hair_mask_down = F.interpolate(final_hair_mask.float(), size=(256, 256), mode='bicubic')
-    color_feature = color_feature * final_hair_mask_down + source_feature * (1-final_hair_mask_down)
-    return color_feature, final_hair_mask
