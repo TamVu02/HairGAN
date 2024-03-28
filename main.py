@@ -87,7 +87,7 @@ def main(args):
             
             for target_name in target_img_list:
                 if os.path.isfile(os.path.join(opts.src_img_dir,f'{target_name}.png')):
-                      print(f"/n==Performing edit source image on target image {target_name}.png")
+                      print(f"\n==Performing edit source image on target image {target_name}.png")
                       ref_image = image_transform(Image.open(f'{opts.src_img_dir}/{target_name}.png').convert('RGB')).unsqueeze(0).cuda()
                       #Run ref proxy on target image
                       latent_global,visual_global_list=ref_proxy(target_name+'.png', src_image=src_image, m_style=6)
