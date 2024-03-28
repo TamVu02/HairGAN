@@ -67,7 +67,7 @@ def main(args):
             if not os.path.isfile(os.path.join(opts.latent_dir, f"{src_name}.npy")):
                 src_latent = re4e.invert_image_in_W(image_path=os.path.join(opts.src_img_dir,f'{img}.png'), device='cuda')
             else:
-                src_latent = torch.from_numpy(np.load(f'{opts.latent_dir}/{src_name}.npy')).unsqueeze(0).cuda()
+                src_latent = torch.from_numpy(np.load(f'{opts.latent_dir}/{src_name}.npy')).cuda()
             src_image = image_transform(Image.open(f'{opts.src_img_dir}/{src_name}.png').convert('RGB')).unsqueeze(0).cuda()
             input_mask = torch.argmax(seg(src_image)[1], dim=1).long().clone().detach()
 
