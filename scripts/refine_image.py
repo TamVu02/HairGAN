@@ -50,7 +50,7 @@ class RefineProxy(torch.nn.Module):
         input_img_256 = F.interpolate(input_image, size=(256, 256))
         return input_img_256, input_face_256
 
-    def forward(self, blended_latent, src_image, ref_img,m_style=6):
+    def forward(self, blended_latent, src_image, ref_img, target_mask):
         image_transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])]) 
         ref_img = image_transform(ref_img).unsqueeze(0).cuda()
         ref_img_256, ref_hairmask_256 = self.gen_256_img_hairmask(ref_img)
@@ -72,8 +72,12 @@ class RefineProxy(torch.nn.Module):
             no_hair_region = (1 - ref_hairmask_256) * (1 - source_hairmask_256)
             face_loss = self.percept_with_mask(img_gen_256, source_img_256,mask=no_hair_region)
             #mask loss
+            ce_loss=0
+            if target_mask is not None:
+                gen_seg = self.seg(img_gen)[1]
+                ce_loss = 1.0 * self.cross_entropy(gen_seg, target_mask)
 
-            loss = 0.2*hair_loss + face_loss
+            loss = hair_loss + face_loss + ce_loss
             
             loss.backward()
             optimizer.step()
