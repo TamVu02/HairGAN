@@ -92,9 +92,10 @@ def main(args):
                       #Run ref proxy on target image
                       latent_global,visual_global_list=ref_proxy(target_name+'.png', src_image=src_image, m_style=6)
                       #Blending feature
-                      _, _, edited_latent = hairstyle_feature_blending_2(generator, seg, src_image, input_mask,latent_bald, latent_global)
+                      blend_source,_, _, edited_latent = hairstyle_feature_blending_2(generator, seg, src_image, input_mask,latent_bald, latent_global)
                       #Refine blending image
-                      final_image,_,_=refine_proxy(blended_latent=edited_latent, src_image=src_image, ref_img=visual_global_list[-1],m_style=5)
+                      target_mask = seg(blend_source)[1]
+                      final_image,_,_=refine_proxy(blended_latent=edited_latent, src_image=src_image, ref_img=visual_global_list[-1],target_mask=target_mask)
                       #Print metric score
                       lpips_score = loss_builder._loss_lpips(src_image, final_image).item()
                       ssim_score = calculate_ssim_score_skimage(src_image,final_image)
@@ -103,7 +104,7 @@ def main(args):
                       csv_writer.writerow([src_name, target_name, lpips_score, ssim_score])
                       #Save output image
                       img_output = Image.fromarray(process_display_input(final_image))
-                      im_path = os.path.join(args.save_output_dir, f'{src_name}_{target_name}_refine_3.png')
+                      im_path = os.path.join(args.save_output_dir, f'{src_name}_{target_name}_refine_4.png')
                       img_output.save(im_path)
                       print(f'Done saving output {src_name}_{target_name}_refine_3.png to {args.save_output_dir}')
                 else:
