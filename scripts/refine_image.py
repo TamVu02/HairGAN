@@ -23,6 +23,7 @@ class RefineProxy(torch.nn.Module):
                 model="net-lin", net="vgg", vgg_blocks=['1', '2', '3'], use_gpu=self.opts.device == 'cuda'
             )
         self.percept_with_mask.eval()
+        self.cross_entropy = torch.nn.CrossEntropyLoss()
 
     def weighted_ce_loss(self):
         weight_tmp = torch.zeros(16).cuda()
