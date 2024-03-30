@@ -45,7 +45,7 @@ class Embedding_sg3(nn.Module):
     def setup_embedding_loss_builder(self):
         self.loss_builder = EmbeddingLossBuilder(self.opts)
 
-    def invert_image_in_W(self, image_path=None ,device=None):
+    def invert_image_in_W(self, image_path=None ,device=None, avg_image=None):
         latent_dir = self.opts.latent_dir
         im_name = os.path.splitext(os.path.basename(image_path))[0]
         latent_W_path = os.path.join(latent_dir, f'{im_name}.npy')
@@ -56,7 +56,6 @@ class Embedding_sg3(nn.Module):
 
         if not os.path.isfile(latent_W_path):
             with torch.no_grad():
-                avg_image = get_average_image(self.generator)
                 avg_image = avg_image.unsqueeze(0).repeat(ref_im_L.shape[0], 1, 1, 1)
                 x_input = torch.cat([ref_im_L, avg_image], dim=1)
                 gen_im,latent = self.generator(x_input,latent=latent, return_latents=True, resize=False)
