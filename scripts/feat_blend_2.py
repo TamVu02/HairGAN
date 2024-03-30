@@ -11,7 +11,7 @@ img_transforms = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
 
-def hairstyle_feature_blending_2(generator, seg, src_image, visual_mask, latent_bald, latent_global=None):
+def hairstyle_feature_blending_2(generator, seg, src_image, visual_mask, latent_bald, latent_global=None, avg_image=None):
 
     if latent_global is not None:
         bald_feature = generator.decoder.synthesis(latent_bald, noise_mode='const')
@@ -35,7 +35,6 @@ def hairstyle_feature_blending_2(generator, seg, src_image, visual_mask, latent_
     out = img_transforms(feat_out_img).unsqueeze(0).to('cuda')
 
     with torch.no_grad():
-            avg_image = get_average_image(generator)
             avg_image = avg_image.unsqueeze(0).repeat(out.shape[0], 1, 1, 1)
             x_input = torch.cat([out, avg_image], dim=1)
             img_gen_blend,blend_latent = generator(x_input,latent=None, return_latents=True, resize=False)
