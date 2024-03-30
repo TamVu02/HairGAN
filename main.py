@@ -42,7 +42,7 @@ def main(args):
     #Define image transform
     image_transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
     #Load stylegan3 model for generator
-    generator, opts_sg3, mean_latent_code, seg = load_sg3_models(opts)
+    generator, opts_sg3, mean_latent_code, seg, avg_img = load_sg3_models(opts)
     #Load embedding and loss
     re4e = Embedding_sg3(opts, generator, mean_latent_code[0,0])
     loss_builder = EmbeddingLossBuilder(opts)
@@ -65,7 +65,7 @@ def main(args):
             print(f"Performing edit on image {img}.png")
             src_name=img
             if not os.path.isfile(os.path.join(opts.latent_dir, f"{src_name}.npy")):
-                src_latent = re4e.invert_image_in_W(image_path=os.path.join(opts.src_img_dir,f'{img}.png'), device='cuda')
+                src_latent = re4e.invert_image_in_W(image_path=os.path.join(opts.src_img_dir,f'{img}.png'), device='cuda', avg_img)
             else:
                 src_latent = torch.from_numpy(np.load(f'{opts.latent_dir}/{src_name}.npy')).cuda()
             src_image = image_transform(Image.open(f'{opts.src_img_dir}/{src_name}.png').convert('RGB')).unsqueeze(0).cuda()
@@ -92,7 +92,7 @@ def main(args):
                       #Run ref proxy on target image
                       latent_global,visual_global_list=ref_proxy(target_name+'.png', src_image=src_image, m_style=6)
                       #Blending feature
-                      blend_source,_, _, edited_latent = hairstyle_feature_blending_2(generator, seg, src_image, input_mask,latent_bald, latent_global)
+                      blend_source,_, _, edited_latent = hairstyle_feature_blending_2(generator, seg, src_image, input_mask,latent_bald, latent_global, avg_img)
                       #Refine blending image
                       target_mask = seg(blend_source)[1]
                       final_image,_,_=refine_proxy(blended_latent=edited_latent, src_image=src_image, ref_img=visual_global_list[-1],target_mask=target_mask)
