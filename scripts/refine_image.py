@@ -59,6 +59,7 @@ class RefineProxy(torch.nn.Module):
         source_img_256, source_facemask_256 = self.gen_256_img_facemask(src_image)
         blended_latent=blended_latent.requires_grad_(True)
         optimizer = torch.optim.Adam([blended_latent], lr=self.opts.lr_refine)
+        target_mask = torch.argmax(target_mask, dim=1).detach().clone()
 
         visual_list = []
         visual_interval = self.opts.steps_refine // self.opts.visual_num_ref
