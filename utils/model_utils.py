@@ -2,6 +2,7 @@ import torch
 from models.stylegan2.model import Generator
 from models.face_parsing.model import BiSeNet
 from utils.inference_utils import load_encoder
+from utils.inference_utils import get_average_image
 
 def load_base_models(opts):
     ckpt = opts.stylegan_path
@@ -38,4 +39,6 @@ def load_sg3_models(opts):
     seg.eval()
     seg = seg.cuda()
 
-    return generator, opts_sg3, mean_latent, seg
+    avg_image = get_average_image(generator)
+
+    return generator, opts_sg3, mean_latent, seg, avg_image
