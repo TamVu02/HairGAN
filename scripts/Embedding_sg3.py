@@ -17,11 +17,10 @@ from utils.inference_utils import get_average_image
 
 
 class Embedding_sg3(nn.Module):
-    def __init__(self, opts, generator, mean_latent_code):
+    def __init__(self, opts, generator):
         super(Embedding_sg3, self).__init__()
         self.opts = opts
         self.generator = generator
-        self.mean_latent_code = mean_latent_code
         self.image_transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
         self.load_PCA_model()
         self.load_downsampling()
