@@ -13,7 +13,6 @@ from PIL import Image
 import torch.nn.functional as F
 import os
 from utils.common import convert_npy_code
-from utils.inference_utils import get_average_image
 
 
 class Embedding_sg3(nn.Module):
