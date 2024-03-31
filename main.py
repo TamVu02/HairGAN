@@ -44,7 +44,7 @@ def main(args):
     #Load stylegan3 model for generator
     generator, opts_sg3, mean_latent_code, seg, avg_img = load_sg3_models(opts)
     #Load embedding and loss
-    re4e = Embedding_sg3(opts, generator, mean_latent_code[0,0])
+    re4e = Embedding_sg3(opts, generator)
     loss_builder = EmbeddingLossBuilder(opts)
     #Load ref proxy
     ref_proxy = RefProxy(opts, generator, seg, re4e)
