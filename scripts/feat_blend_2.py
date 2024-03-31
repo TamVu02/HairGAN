@@ -38,7 +38,7 @@ def hairstyle_feature_blending_2(generator, seg, src_image, visual_mask, latent_
             avg_image = avg_image.unsqueeze(0).repeat(out.shape[0], 1, 1, 1)
             x_input = torch.cat([out, avg_image], dim=1)
             img_gen_blend,blend_latent = generator(x_input,latent=None, return_latents=True, resize=False)
-    return src_image, feat_out_img, img_gen_blend, blend_latent
+    return src_image, img_gen_blend, blend_latent
 
 def hair_aligning(generator, seg, src_image, visual_mask, latent_global=None):
 
