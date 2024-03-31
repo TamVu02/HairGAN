@@ -42,7 +42,7 @@ def main(args):
     #Define image transform
     image_transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
     #Load stylegan3 model for generator
-    generator, opts_sg3, mean_latent_code, seg, avg_img = load_sg3_models(opts)
+    generator, opts_sg3, seg, avg_img = load_sg3_models(opts)
     #Load embedding and loss
     re4e = Embedding_sg3(opts, generator)
     loss_builder = EmbeddingLossBuilder(opts)
