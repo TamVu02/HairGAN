@@ -91,7 +91,7 @@ def main(args):
                       #Run ref proxy on target image
                       latent_global,visual_global_list=ref_proxy(target_name+'.png', src_image=src_image, m_style=6)
                       #Blending feature
-                      blend_source,_, _, edited_latent = hairstyle_feature_blending_2(generator, seg, src_image, input_mask,latent_bald, latent_global, avg_img)
+                      blend_source,_, edited_latent = hairstyle_feature_blending_2(generator, seg, src_image, input_mask,latent_bald, latent_global, avg_img)
                       #Refine blending image
                       target_mask = seg(blend_source)[1]
                       final_image,_,_=refine_proxy(blended_latent=edited_latent, src_image=src_image, ref_img=visual_global_list[-1],target_mask=target_mask)
