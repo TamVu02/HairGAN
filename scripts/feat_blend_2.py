@@ -16,8 +16,7 @@ def hairstyle_feature_blending_2(generator, seg, src_image, visual_mask, latent_
     if latent_global is not None:
         bald_feature = generator.decoder.synthesis(latent_bald, noise_mode='const')
         global_feature = generator.decoder.synthesis(latent_global, noise_mode='const')
-        global_proxy = generator.decoder.synthesis(latent_global, noise_mode='const')
-        global_proxy_seg = torch.argmax(seg(global_proxy)[1], dim=1).unsqueeze(1).long()
+        global_proxy_seg = torch.argmax(seg(global_feature)[1], dim=1).unsqueeze(1).long()
 
         ear_mask = torch.where(visual_mask==6, torch.ones_like(visual_mask), torch.zeros_like(visual_mask))[0].cpu().numpy()
         hair_mask = torch.where(visual_mask==10, torch.ones_like(visual_mask), torch.zeros_like(visual_mask))[0].cpu().numpy()
