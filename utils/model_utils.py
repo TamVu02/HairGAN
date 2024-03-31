@@ -25,11 +25,6 @@ def load_base_models(opts):
 
 def load_sg3_models(opts):
     generator,opts_sg3 = load_encoder(checkpoint_path=opts.stylegan3_weights,generator_path=opts.generator_path3)
-    # generator = net.decoder
-    # generator.eval()
-    # generator = generator.cuda()
-
-    mean_latent = generator.latent_avg.repeat(16, 1).unsqueeze(0).cuda()
 
     seg_pretrained_path = opts.seg_path
     seg = BiSeNet(n_classes=16)
@@ -41,4 +36,4 @@ def load_sg3_models(opts):
 
     avg_image = get_average_image(generator)
 
-    return generator, opts_sg3, mean_latent, seg, avg_image
+    return generator, opts_sg3, seg, avg_image
