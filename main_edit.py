@@ -98,7 +98,7 @@ def main(args):
             latent_bald=edit_latents[-1].unsqueeze(0)
 
             #Retrieve 3 random image in image_list
-            target_img_list=['06853','06845','06838']
+            target_img_list=['06853','06845']
             
             for target_name in target_img_list:
                 if os.path.isfile(os.path.join(opts.src_img_dir,f'{target_name}.png')):
@@ -115,12 +115,12 @@ def main(args):
                                         factor_range = (-5,5),
                                         user_transforms=None,
                                         apply_user_transformations=False)
-                      latent_global=edit_latents[-1]
+                      latent_global,visual_global_list=ref_proxy(target_name+'.png', src_image=src_image, m_style=6,edit_latent=edit_latents[-1])
                       #Blending feature
                       blend_source,_, edited_latent = hairstyle_feature_blending_2(generator, seg, src_image, input_mask,latent_bald, latent_global, avg_img)
                       #Refine blending image
                       target_mask = seg(blend_source)[1]
-                      final_image,_,_=refine_proxy(blended_latent=edited_latent, src_image=src_image, ref_img=ref_feat[-1][-1],target_mask=target_mask)
+                      final_image,_,_=refine_proxy(blended_latent=edited_latent, src_image=src_image, ref_img=visual_global_list[-1],target_mask=target_mask)
                       #Print metric score
                       lpips_score = loss_builder._loss_lpips(src_image, final_image).item()
                       ssim_score = calculate_ssim_score_skimage(src_image,final_image)
