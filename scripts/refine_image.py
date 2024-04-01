@@ -53,7 +53,10 @@ class RefineProxy(torch.nn.Module):
 
     def forward(self, blended_latent, src_image, ref_img, target_mask):
         image_transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])]) 
-        ref_img = image_transform(ref_img).unsqueeze(0).cuda()
+        if not isinstance(ref_img, torch.Tensor):
+           ref_img = image_transform(ref_img).unsqueeze(0).cuda()
+        else:
+           ref_img = ref_img.unsqueeze(0).cuda()
         ref_img_256, ref_hairmask_256 = self.gen_256_img_hairmask(ref_img)
         source_img_256, source_hairmask_256 = self.gen_256_img_hairmask(src_image)
         blended_latent=blended_latent.requires_grad_(True)
