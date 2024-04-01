@@ -6,7 +6,6 @@ from PIL import Image
 from torchvision import transforms
 from scripts.Embedding_sg3 import Embedding_sg3
 from editing.interfacegan.face_editor import FaceEditor
-from editing.interfacegan.helpers.pose_estimator import PoseEstimator
 from models.stylegan3.model import GeneratorType
 from scripts.ref_proxy import RefProxy
 from scripts.refine_image import RefineProxy
@@ -67,7 +66,6 @@ def main(args):
     refine_proxy = RefineProxy(opts, generator, seg)
     #Load interfaceGAN for bald proxy
     editor = FaceEditor(stylegan_generator=generator.decoder, generator_type=GeneratorType.ALIGNED)
-    pose_estimator = PoseEstimator()
     edit_direction=['Bald','pose']
     separator = '=' * 90
     #open output result metric csv file
@@ -99,7 +97,6 @@ def main(args):
             latent_bald=edit_latents[-1].unsqueeze(0)
 
             #Extract pose attribute of source image
-            pose_att = pose_estimator.extract_yaw(src_image).cpu().detach().numpy()[0]
 
             #Retrieve 3 random image in image_list
             img_list_alt=args.img_list.copy()
@@ -114,7 +111,7 @@ def main(args):
                       #Warp image base on source image pose att
                       ref_feat, edit_latents = editor.edit(latents=src_latent,
                                         direction=edit_direction[1],
-                                        factor = pose_att,
+                                        factor = (-5,5),
                                         user_transforms=None,
                                         apply_user_transformations=False)
                       latent_global=edit_latents[-1].unsqueeze(0)
