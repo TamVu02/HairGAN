@@ -72,7 +72,7 @@ class FaceEditor:
                 self.generator.synthesis.input.transform = user_transforms.cuda().float()
             # generate the images
             images = self.generator.synthesis(all_latents, noise_mode='const')
-            images = [tensor2im(image) for image in images]
+            #images = [tensor2im(image) for image in images]
         return images, user_transforms
 
     def get_kp_extractor(self, input_image):
