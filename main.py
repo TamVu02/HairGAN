@@ -32,6 +32,21 @@ def calculate_ssim_score_skimage(src_tensor, ref_tensor):
     ssim_score = ssim(src_np, ref_np, multichannel = True)
     return ssim_score
 
+def psnr(image1, image2):
+    # Convert PIL images to NumPy arrays
+    array1 = np.array(image1)#.astype(float)
+    array2 = np.array(image2)#.astype(float)
+
+    # Calculate mean squared error (MSE)
+    mse = np.mean((array1 - array2) ** 2)
+    
+    # Calculate maximum possible pixel value (assuming 8-bit image)
+    max_val = 255
+
+    # Calculate PSNR
+    psnr = 10 * np.log10((max_val ** 2) / mse)
+    return psnr
+
 def main(args):
     #Load args
     opts = Options().parse(jupyter=True)
@@ -57,7 +72,7 @@ def main(args):
     csv_output_file = open_csv_file(args.output_result)
     csv_writer = csv.writer(csv_output_file)
     if os.path.getsize(args.output_result) == 0:
-        csv_writer.writerow(['source', 'target', 'lpips_score','ssim_score'])
+        csv_writer.writerow(['source', 'target', 'lpips_score','ssim_score','psnr_score'])
 
     for img in args.img_list:
         print(separator)
@@ -68,7 +83,8 @@ def main(args):
                 src_latent = re4e.invert_image_in_W(image_path=os.path.join(opts.src_img_dir,f'{img}.png'), device='cuda', avg_img)
             else:
                 src_latent = torch.from_numpy(np.load(f'{opts.latent_dir}/{src_name}.npy')).cuda()
-            src_image = image_transform(Image.open(f'{opts.src_img_dir}/{src_name}.png').convert('RGB')).unsqueeze(0).cuda()
+            src_pil = Image.open(f'{opts.src_img_dir}/{src_name}.png').convert('RGB')
+            src_image = image_transform(src_pil).unsqueeze(0).cuda()
             input_mask = torch.argmax(seg(src_image)[1], dim=1).long().clone().detach()
 
             #Perform interface gan with bald pretrain model
@@ -99,13 +115,15 @@ def main(args):
                       lpips_score = loss_builder._loss_lpips(src_image, final_image).item()
                       ssim_score = calculate_ssim_score_skimage(src_image,final_image)
                       print(f'LPIPS score: {lpips_score} \t SSIM score: {ssim_score}')
-                      #Save score as format: source_name, target_name, lpips_score, ssim_score
-                      csv_writer.writerow([src_name, target_name, lpips_score, ssim_score])
-                      #Save output image
                       img_output = Image.fromarray(process_display_input(final_image))
-                      im_path = os.path.join(args.save_output_dir, f'{src_name}_{target_name}_refine_4.png')
+                      psnr_score = psnr(img_output, src_pil)
+                      print(f'LPIPS score: {lpips_score} \t SSIM score: {ssim_score} \t PSNR score: {psnr_score}')
+                      #save metric as format: source_name, target_name, lpips_score, ssim_score
+                      csv_writer.writerow([src_name, target_name, lpips_score, ssim_score, psnr_score])
+                      #Save output image
+                      im_path = os.path.join(args.save_output_dir, f'{src_name}_{target_name}_refine.png')
                       img_output.save(im_path)
-                      print(f'Done saving output {src_name}_{target_name}_refine_3.png to {args.save_output_dir}')
+                      print(f'Done saving output {src_name}_{target_name}_refine.png to {args.save_output_dir}')
                 else:
                     print(f'Image target {target_name}.png does not exit in {opts.src_img_dir}')
         else:
@@ -117,7 +135,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--save_output_dir', type=str ,default='/content/drive/MyDrive/HairGAN/Final_HairGAN/output_img/refine',help='directory for saving images after blending')
     parser.add_argument('--img_list', type=str,nargs='+',help='image list eg: 00004 00006 00131 03177')
-    parser.add_argument('--output_result', type=str, default='/content/drive/MyDrive/HairGAN/Final_HairGAN/output_img/result_metric.csv', help='csv file for saving metric result')
+    parser.add_argument('--output_result', type=str, default='/content/drive/MyDrive/HairGAN/Final_HairGAN/output_img/result_metric_refine.csv', help='csv file for saving metric result')
 
     
     args = parser.parse_args()
