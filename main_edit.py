@@ -116,8 +116,6 @@ def main(args):
                                         user_transforms=None,
                                         apply_user_transformations=False)
                       latent_global=edit_latents[-1]
-                      print(latent_global.shape)
-                      print(type(ref_feat[-1][0]))
                       #Blending feature
                       blend_source,_, edited_latent = hairstyle_feature_blending_2(generator, seg, src_image, input_mask,latent_bald, latent_global, avg_img)
                       #Refine blending image
