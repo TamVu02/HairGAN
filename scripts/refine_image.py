@@ -78,7 +78,7 @@ class RefineProxy(torch.nn.Module):
                 gen_seg = self.seg(img_gen)[1]
                 ce_loss = 1.0 * self.cross_entropy(gen_seg, target_mask)
 
-            loss = hair_loss + 1.5 * face_loss + ce_loss
+            loss = hair_loss + 1.2 * face_loss + ce_loss
             
             loss.backward()
             optimizer.step()
