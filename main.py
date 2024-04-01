@@ -89,7 +89,8 @@ def main(args):
 
             #Perform interface gan with bald pretrain model
             print(f"Performing edit for {edit_direction}...")
-            _, edit_latents = editor.edit(latents=src_latent,
+            _, edit_latents = editor.edit(src_image,
+                                        latents=src_latent,
                                         direction=edit_direction,
                                         factor = 5,
                                         user_transforms=None,
