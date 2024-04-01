@@ -69,7 +69,6 @@ class RefProxy(torch.nn.Module):
         else:
           ref_img = self.generator.decoder.synthesis(edit_latent, noise_mode='const')
           latent_W_optimized = edit_latent
-        ref_img, latent_W_optimized = self.load_hairstyle_ref(hairstyle_ref_name, avg_image)
         ref_img_256, ref_hairmask_256 = self.gen_256_img_hairmask(ref_img)
         optimizer = torch.optim.Adam([latent_W_optimized], lr=self.opts.lr_ref)
         latent_end = latent_W_optimized[:, m_style:, :].clone().detach()
