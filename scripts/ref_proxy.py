@@ -62,7 +62,13 @@ class RefProxy(torch.nn.Module):
         input_img_256 = F.interpolate(input_image, size=(256, 256))
         return input_img_256, input_hairmask_256
 
-    def forward(self, hairstyle_ref_name, src_image, painted_mask=None,m_style=6,avg_image=None):
+    def forward(self, hairstyle_ref_name, src_image, painted_mask=None,m_style=6,avg_image=None,edit_latent=None):
+        if edit_latent is None:
+          print('Perform ref proxy on initial ref image...')
+          ref_img, latent_W_optimized = self.load_hairstyle_ref(hairstyle_ref_name, avg_image)
+        else:
+          ref_img = self.generator.decoder.synthesis(edit_latent, noise_mode='const')
+          latent_W_optimized = edit_latent
         ref_img, latent_W_optimized = self.load_hairstyle_ref(hairstyle_ref_name, avg_image)
         ref_img_256, ref_hairmask_256 = self.gen_256_img_hairmask(ref_img)
         optimizer = torch.optim.Adam([latent_W_optimized], lr=self.opts.lr_ref)
