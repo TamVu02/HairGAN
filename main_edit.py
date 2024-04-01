@@ -6,6 +6,7 @@ from PIL import Image
 from torchvision import transforms
 from scripts.Embedding_sg3 import Embedding_sg3
 from editing.interfacegan.face_editor import FaceEditor
+from editing.interfacegan.helpers.pose_estimator import PoseEstimator
 from models.stylegan3.model import GeneratorType
 from scripts.ref_proxy import RefProxy
 from scripts.refine_image import RefineProxy
@@ -66,7 +67,7 @@ def main(args):
     refine_proxy = RefineProxy(opts, generator, seg)
     #Load interfaceGAN for bald proxy
     editor = FaceEditor(stylegan_generator=generator.decoder, generator_type=GeneratorType.ALIGNED)
-    edit_direction='Bald'
+    edit_direction=['Bald','pose']
     separator = '=' * 90
     #open output result metric csv file
     csv_output_file = open_csv_file(args.output_result)
@@ -89,12 +90,15 @@ def main(args):
 
             #Perform interface gan with bald pretrain model
             print(f"Performing edit for {edit_direction}...")
-            _, edit_latents = editor.edit(latents=src_latent,
-                                        direction=edit_direction,
+            bald_feat, edit_latents = editor.edit(latents=src_latent,
+                                        direction=edit_direction[0],
                                         factor = 5,
                                         user_transforms=None,
                                         apply_user_transformations=False)
             latent_bald=edit_latents[-1].unsqueeze(0)
+
+            #Extract pose attribute of source image
+            pose_att = pose_estimator.extract_yaw(src_image).cpu().detach().numpy()[0]
 
             #Retrieve 3 random image in image_list
             img_list_alt=args.img_list.copy()
@@ -105,7 +109,14 @@ def main(args):
                 if os.path.isfile(os.path.join(opts.src_img_dir,f'{target_name}.png')):
                       print(f"\n==Performing edit source image on target image {target_name}.png")
                       #Run ref proxy on target image
-                      latent_global,visual_global_list=ref_proxy(target_name+'.png', src_image=src_image, m_style=6, avg_image=avg_img)
+                    
+                      #Warp image base on source image pose att
+                      ref_feat, edit_latents = editor.edit(latents=src_latent,
+                                        direction=edit_direction[1],
+                                        factor = pose_att,
+                                        user_transforms=None,
+                                        apply_user_transformations=False)
+                      latent_global=edit_latents[-1].unsqueeze(0)
                       #Blending feature
                       blend_source,_, edited_latent = hairstyle_feature_blending_2(generator, seg, src_image, input_mask,latent_bald, latent_global, avg_img)
                       #Refine blending image
