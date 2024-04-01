@@ -38,14 +38,14 @@ class RefProxy(torch.nn.Module):
             param.requires_grad = False
         return kp_extractor
 
-    def load_hairstyle_ref(self, hairstyle_ref_name):
+    def load_hairstyle_ref(self, hairstyle_ref_name,avg_image):
         image_transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
         hairstyle_img_path = f'{self.opts.ref_img_dir}/{hairstyle_ref_name}'
         ref_PIL = Image.open(hairstyle_img_path).convert('RGB')
         ref_img = image_transform(ref_PIL).unsqueeze(0).cuda()
 
         if not os.path.isfile(os.path.join(self.opts.latent_dir, f"{os.path.splitext(hairstyle_ref_name)[0]}.npy")):
-            latent_W_optimized = self.re4e.invert_image_in_W(image_path=hairstyle_img_path, device='cuda')
+            latent_W_optimized = self.re4e.invert_image_in_W(image_path=hairstyle_img_path, device='cuda', avg_image=avg_image)
             # save_latent_path = os.path.join(self.opts.latent_dir, f'{os.path.splitext(hairstyle_ref_name)[0]}.npy')
             # np.save(save_latent_path, inverted_latent_w_plus.detach().cpu().numpy())
         else:
@@ -62,8 +62,8 @@ class RefProxy(torch.nn.Module):
         input_img_256 = F.interpolate(input_image, size=(256, 256))
         return input_img_256, input_hairmask_256
 
-    def forward(self, hairstyle_ref_name, src_image, painted_mask=None,m_style=6):
-        ref_img, latent_W_optimized = self.load_hairstyle_ref(hairstyle_ref_name)
+    def forward(self, hairstyle_ref_name, src_image, painted_mask=None,m_style=6,avg_image=None):
+        ref_img, latent_W_optimized = self.load_hairstyle_ref(hairstyle_ref_name, avg_image)
         ref_img_256, ref_hairmask_256 = self.gen_256_img_hairmask(ref_img)
         optimizer = torch.optim.Adam([latent_W_optimized], lr=self.opts.lr_ref)
         latent_end = latent_W_optimized[:, m_style:, :].clone().detach()
