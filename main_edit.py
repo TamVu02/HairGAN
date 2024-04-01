@@ -88,7 +88,7 @@ def main(args):
             input_mask = torch.argmax(seg(src_image)[1], dim=1).long().clone().detach()
 
             #Perform interface gan with bald pretrain model
-            print(f"Performing edit for {edit_direction}...")
+            print(f"Performing edit for {edit_direction[0]}...")
             bald_feat, edit_latents = editor.edit(src_image,
                                         latents=src_latent,
                                         direction=edit_direction[0],
@@ -108,14 +108,14 @@ def main(args):
                       else:
                         ref_latent = torch.from_numpy(np.load(f'{opts.latent_dir}/{target_name}.npy')).cuda()
                       #Warp image base on source image pose att
-                      
+                      print(f"Performing edit for {edit_direction[1]}...")
                       ref_feat, edit_latents = editor.edit(src_image,
                                         latents=ref_latent,
                                         direction=edit_direction[1],
                                         factor_range = (-5,5),
                                         user_transforms=None,
                                         apply_user_transformations=False)
-                      latent_global=edit_latents[0]
+                      latent_global=edit_latents[-1]
                       #Blending feature
                       blend_source,_, edited_latent = hairstyle_feature_blending_2(generator, seg, src_image, input_mask,latent_bald, latent_global, avg_img)
                       #Refine blending image
