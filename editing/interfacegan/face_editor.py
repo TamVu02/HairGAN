@@ -34,9 +34,9 @@ class FaceEditor:
              user_transforms: Optional[np.ndarray] = None, apply_user_transformations: Optional[bool] = False):
         edit_latents = []
         edit_images = []
-        diff_score=-100000000
+        diff_score=100000000
         if direction=='pose':
-          kp_source=self.get_kp_extractor(src_image)
+          kp_source=self.get_kp_extractor(src_image).detach().cpu().numpy()
 
         direction_ = self.interfacegan_directions[direction]
         if factor_range is not None:  # Apply a range of editing factors. for example, (-5, 5)
@@ -79,7 +79,7 @@ class FaceEditor:
         return self.kp_extractor.face_alignment_net(((F.interpolate(input_image, size=(256, 256)) + 1) / 2).clamp(0, 1))
 
     def check_pose_diff(self,kp1, im_2, device):
-        kp2 = self.get_kp_extractor(im_2)
+        kp2 = self.get_kp_extractor(im_2).detach().cpu().numpy()
         kp_diff = np.mean(np.abs(kp1 - kp2))
         return kp_diff
 
