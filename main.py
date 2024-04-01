@@ -114,7 +114,6 @@ def main(args):
                       #Print metric score
                       lpips_score = loss_builder._loss_lpips(src_image, final_image).item()
                       ssim_score = calculate_ssim_score_skimage(src_image,final_image)
-                      print(f'LPIPS score: {lpips_score} \t SSIM score: {ssim_score}')
                       img_output = Image.fromarray(process_display_input(final_image))
                       psnr_score = psnr(img_output, src_pil)
                       print(f'LPIPS score: {lpips_score} \t SSIM score: {ssim_score} \t PSNR score: {psnr_score}')
