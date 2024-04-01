@@ -15,6 +15,7 @@ class FaceEditor:
 
     def __init__(self, stylegan_generator: Generator, generator_type=GeneratorType.ALIGNED):
         self.generator = stylegan_generator
+        self.kp_extractor = self.load_kp_extractor()
         if generator_type == GeneratorType.ALIGNED:
             paths = interfacegan_aligned_edit_paths
         else:
@@ -81,4 +82,10 @@ class FaceEditor:
         kp2 = self.get_kp_extractor(im_2)
         kp_diff = np.mean(np.abs(kp1 - kp2))
         return kp_diff
+
+    def load_kp_extractor(self):
+        kp_extractor = face_alignment.FaceAlignment(face_alignment.LandmarksType.THREE_D, flip_input=False, device='cuda')
+        for param in kp_extractor.face_alignment_net.parameters():
+            param.requires_grad = False
+        return kp_extractor
 
