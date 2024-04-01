@@ -46,7 +46,7 @@ class FaceEditor:
                                                                      apply_user_transformations,
                                                                      user_transforms)
                 if direction=='pose':
-                  cur_diff_score = self.check_pose_diff(kp_source, edit_image[-1], 'cuda')
+                  cur_diff_score = self.check_pose_diff(kp_source, edit_image, 'cuda')
                   if cur_diff_score < diff_score:
                     edit_images.append(edit_image)
                     edit_latents.append(edit_latent)
@@ -72,7 +72,6 @@ class FaceEditor:
                 self.generator.synthesis.input.transform = user_transforms.cuda().float()
             # generate the images
             images = self.generator.synthesis(all_latents, noise_mode='const')
-            #images = [tensor2im(image) for image in images]
         return images, user_transforms
 
     def get_kp_extractor(self, input_image):
