@@ -55,7 +55,7 @@ class FaceEditor:
                   edit_latents.append(edit_latent)
                   edit_images.append(edit_image)
         else:
-            edit_latents = latents + factor * direction
+            edit_latents = latents + factor * direction_
             edit_images, _ = self._latents_to_image(edit_latents, apply_user_transformations)
         return edit_images, edit_latents
 
