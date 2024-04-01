@@ -46,7 +46,7 @@ class FaceEditor:
                                                                      apply_user_transformations,
                                                                      user_transforms)
                 if direction=='pose':
-                  cur_diff_score = self.check_pose_diff(kp_source, edit_image, 'cuda')
+                  cur_diff_score = self.check_pose_diff(kp_source, edit_image[-1], 'cuda')
                   if cur_diff_score < diff_score:
                     edit_images.append(edit_image)
                     edit_latents.append(edit_latent)
