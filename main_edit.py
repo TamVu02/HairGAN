@@ -89,7 +89,8 @@ def main(args):
 
             #Perform interface gan with bald pretrain model
             print(f"Performing edit for {edit_direction}...")
-            bald_feat, edit_latents = editor.edit(latents=src_latent,
+            bald_feat, edit_latents = editor.edit(src_image,
+                                        latents=src_latent,
                                         direction=edit_direction[0],
                                         factor = 5,
                                         user_transforms=None,
@@ -109,7 +110,8 @@ def main(args):
                       #Run ref proxy on target image
                     
                       #Warp image base on source image pose att
-                      ref_feat, edit_latents = editor.edit(latents=src_latent,
+                      ref_feat, edit_latents = editor.edit(src_image,
+                                        latents=src_latent,
                                         direction=edit_direction[1],
                                         factor = (-5,5),
                                         user_transforms=None,
