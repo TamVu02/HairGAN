@@ -24,6 +24,7 @@ class FaceEditor:
             # 'pose': torch.from_numpy(np.load(paths['pose'])).cuda(),
             # 'Male': torch.from_numpy(np.load(paths['Male'])).cuda(),
             'Bald': torch.from_numpy(np.load(paths['Bald'])).cuda(),
+            'pose': torch.from_numpy(np.load(paths['pose'])).cuda(),
         }
 
     def edit(self, latents: torch.tensor, direction: str, factor: int = 1, factor_range: Optional[Tuple[int, int]] = None,
