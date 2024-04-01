@@ -38,10 +38,10 @@ class FaceEditor:
         if direction=='pose':
           kp_source=self.get_kp_extractor(src_image)
 
-        direction = self.interfacegan_directions[direction]
+        direction_ = self.interfacegan_directions[direction]
         if factor_range is not None:  # Apply a range of editing factors. for example, (-5, 5)
             for f in range(*factor_range):
-                edit_latent = latents + f * direction
+                edit_latent = latents + f * direction_
                 edit_image, user_transforms = self._latents_to_image(edit_latent,
                                                                      apply_user_transformations,
                                                                      user_transforms)
