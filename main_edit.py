@@ -97,31 +97,32 @@ def main(args):
                                         apply_user_transformations=False)
             latent_bald=edit_latents[-1].unsqueeze(0)
 
-            #Extract pose attribute of source image
-
             #Retrieve 3 random image in image_list
-            img_list_alt=args.img_list.copy()
-            random.shuffle(img_list_alt)
-            target_img_list=[im for im in img_list_alt if im != src_name][:3]
+            target_img_list=['06853','06845','06838']
             
             for target_name in target_img_list:
                 if os.path.isfile(os.path.join(opts.src_img_dir,f'{target_name}.png')):
                       print(f"\n==Performing edit source image on target image {target_name}.png")
-                      #Run ref proxy on target image
-                    
+                      if not os.path.isfile(os.path.join(opts.latent_dir, f"{target_name}.npy")):
+                        ref_latent = re4e.invert_image_in_W(image_path=os.path.join(opts.src_img_dir,f'{target_name}.png'), device='cuda', avg_image=avg_img)
+                      else:
+                        ref_latent = torch.from_numpy(np.load(f'{opts.latent_dir}/{target_name}.npy')).cuda()
                       #Warp image base on source image pose att
+                      
                       ref_feat, edit_latents = editor.edit(src_image,
-                                        latents=src_latent,
+                                        latents=ref_latent,
                                         direction=edit_direction[1],
-                                        factor = (-5,5),
+                                        factor_range = (-5,5),
                                         user_transforms=None,
                                         apply_user_transformations=False)
-                      latent_global=edit_latents[-1].unsqueeze(0)
+                      latent_global=edit_latents[-1]
+                      print(latent_global.shape)
+                      print(type(ref_feat[-1][0]))
                       #Blending feature
                       blend_source,_, edited_latent = hairstyle_feature_blending_2(generator, seg, src_image, input_mask,latent_bald, latent_global, avg_img)
                       #Refine blending image
                       target_mask = seg(blend_source)[1]
-                      final_image,_,_=refine_proxy(blended_latent=edited_latent, src_image=src_image, ref_img=visual_global_list[-1],target_mask=target_mask)
+                      final_image,_,_=refine_proxy(blended_latent=edited_latent, src_image=src_image, ref_img=ref_feat[-1][0],target_mask=target_mask)
                       #Print metric score
                       lpips_score = loss_builder._loss_lpips(src_image, final_image).item()
                       ssim_score = calculate_ssim_score_skimage(src_image,final_image)
