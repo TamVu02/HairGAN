@@ -133,7 +133,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='HairGAN')
 
-    parser.add_argument('--save_output_dir', type=str ,default='/content/drive/MyDrive/HairGAN/Final_HairGAN/output_img/refine',help='directory for saving images after blending')
+    parser.add_argument('--save_output_dir', type=str ,default='/content/drive/MyDrive/HairGAN/Final_HairGAN/output_img/refine_2',help='directory for saving images after blending')
     parser.add_argument('--img_list', type=str,nargs='+',help='image list eg: 00004 00006 00131 03177')
     parser.add_argument('--output_result', type=str, default='/content/drive/MyDrive/HairGAN/Final_HairGAN/output_img/result_metric_refine.csv', help='csv file for saving metric result')
 
