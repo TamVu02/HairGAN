@@ -105,7 +105,7 @@ def main(args):
                 if os.path.isfile(os.path.join(opts.src_img_dir,f'{target_name}.png')):
                       print(f"\n==Performing edit source image on target image {target_name}.png")
                       #Run ref proxy on target image
-                      latent_global,visual_global_list=ref_proxy(target_name+'.png', src_image=src_image, m_style=6)
+                      latent_global,visual_global_list=ref_proxy(target_name+'.png', src_image=src_image, m_style=6, avg_image=avg_img)
                       #Blending feature
                       blend_source,_, edited_latent = hairstyle_feature_blending_2(generator, seg, src_image, input_mask,latent_bald, latent_global, avg_img)
                       #Refine blending image
