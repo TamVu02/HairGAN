@@ -67,6 +67,7 @@ def main(args):
     refine_proxy = RefineProxy(opts, generator, seg)
     #Load interfaceGAN for bald proxy
     editor = FaceEditor(stylegan_generator=generator.decoder, generator_type=GeneratorType.ALIGNED)
+    pose_estimator = PoseEstimator()
     edit_direction=['Bald','pose']
     separator = '=' * 90
     #open output result metric csv file
