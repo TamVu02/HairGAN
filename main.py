@@ -80,7 +80,7 @@ def main(args):
             print(f"Performing edit on image {img}.png")
             src_name=img
             if not os.path.isfile(os.path.join(opts.latent_dir, f"{src_name}.npy")):
-                src_latent = re4e.invert_image_in_W(image_path=os.path.join(opts.src_img_dir,f'{img}.png'), device='cuda', avg_img)
+                src_latent = re4e.invert_image_in_W(image_path=os.path.join(opts.src_img_dir,f'{img}.png'), device='cuda', avg_image=avg_img)
             else:
                 src_latent = torch.from_numpy(np.load(f'{opts.latent_dir}/{src_name}.npy')).cuda()
             src_pil = Image.open(f'{opts.src_img_dir}/{src_name}.png').convert('RGB')
