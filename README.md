@@ -4,7 +4,7 @@
 [Nguyen Minh Tuan](https://github.com/MinhTuan0510),
 [Chu Quang Linh](https://github.com/linhchu1),
 
-![Example result](assets/Thêm nội dung văn bản.png)
+![Example result](assets/eg_result.png)
 
 >  **Abstract** Past studies point that although recent methods have notably enhanced the intricacies of hair depiction, they frequently yield sub-optimal outputs when the pose of
 the source image diverges substantially from that of the reference hair image.To address this primary challenge, our focus is to devise an high-performing
