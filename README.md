@@ -3,6 +3,7 @@
 [Vu Le Bang Tam](https://github.com/TamVu02),
 [Nguyen Minh Tuan](https://github.com/MinhTuan0510),
 [Chu Quang Linh](https://github.com/linhchu1),
+![Example result](assets/Thêm nội dung văn bản.png)
 >  **Abstract** Past studies point that although recent methods have notably enhanced the intricacies of hair depiction, they frequently yield sub-optimal outputs when the pose of
 the source image diverges substantially from that of the reference hair image.To address this primary challenge, our focus is to devise an high-performing
 method for altering hairstyles given in source image and reference image for inputs while ensuring high quality results. We propose a novel approach uti-lizing StyleGAN3 to address this issue.
