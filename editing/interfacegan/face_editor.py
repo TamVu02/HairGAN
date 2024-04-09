@@ -34,11 +34,20 @@ class FaceEditor:
              user_transforms: Optional[np.ndarray] = None, apply_user_transformations: Optional[bool] = False):
         edit_latents = []
         edit_images = []
-        diff_score=100000000
-        if direction=='pose':
-          kp_source=self.get_kp_extractor(src_image).detach().cpu().numpy()
-
         direction_ = self.interfacegan_directions[direction]
+        diff_score=100000000
+                 
+        if direction=='pose':
+          kp_source = self.get_kp_extractor(src_image).detach().cpu().numpy()
+
+        if direction=='pose':
+            ref_image, _ = self._latents_to_image(latents,
+                                                   apply_user_transformations,
+                                                   user_transforms)
+            initial_diff = self.cal_pose_diff(kp_source, ref_image, 'cuda')
+            if initial_diff < 0.005:
+                return None, None
+            
         if factor_range is not None:  # Apply a range of editing factors. for example, (-5, 5)
             for f in range(*factor_range):
                 edit_latent = latents + f * direction_
@@ -46,7 +55,7 @@ class FaceEditor:
                                                                      apply_user_transformations,
                                                                      user_transforms)
                 if direction=='pose':
-                  cur_diff_score = self.check_pose_diff(kp_source, edit_image, 'cuda')
+                  cur_diff_score = self.cal_pose_diff(kp_source, edit_image, 'cuda')
                   if cur_diff_score < diff_score:
                     edit_images.append(edit_image)
                     edit_latents.append(edit_latent)
@@ -77,7 +86,7 @@ class FaceEditor:
     def get_kp_extractor(self, input_image):
         return self.kp_extractor.face_alignment_net(((F.interpolate(input_image, size=(256, 256)) + 1) / 2).clamp(0, 1))
 
-    def check_pose_diff(self,kp1, im_2, device):
+    def cal_pose_diff(self,kp1, im_2, device):
         kp2 = self.get_kp_extractor(im_2).detach().cpu().numpy()
         kp_diff = np.mean(np.abs(kp1 - kp2))
         return kp_diff
