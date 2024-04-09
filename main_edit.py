@@ -78,6 +78,8 @@ def main(args):
         print(separator)
         if os.path.isfile(os.path.join(opts.src_img_dir,f'{img}.png')):
             print(f"Performing edit on image {img}.png")
+            
+            #Embed source image
             src_name=img
             if not os.path.isfile(os.path.join(opts.latent_dir, f"{src_name}.npy")):
                 src_latent = re4e.invert_image_in_W(image_path=os.path.join(opts.src_img_dir,f'{img}.png'), device='cuda', avg_image=avg_img)
@@ -103,32 +105,45 @@ def main(args):
             for target_name in target_img_list:
                 if os.path.isfile(os.path.join(opts.src_img_dir,f'{target_name}.png')):
                       print(f"\n==Performing edit source image on target image {target_name}.png")
+                      
+                      #Embed target image
                       if not os.path.isfile(os.path.join(opts.latent_dir, f"{target_name}.npy")):
                         ref_latent = re4e.invert_image_in_W(image_path=os.path.join(opts.src_img_dir,f'{target_name}.png'), device='cuda', avg_image=avg_img)
                       else:
                         ref_latent = torch.from_numpy(np.load(f'{opts.latent_dir}/{target_name}.npy')).cuda()
-                      #Warp image base on source image pose att
+                          
+                      #Align pose target image follow source pose
                       print(f"Performing edit for {edit_direction[1]}...")
+                      pose_aligned_latent=None
                       ref_feat, edit_latents = editor.edit(src_image,
                                         latents=ref_latent,
                                         direction=edit_direction[1],
                                         factor_range = (-5,5),
                                         user_transforms=None,
                                         apply_user_transformations=False)
-                      latent_global,visual_global_list=ref_proxy(target_name+'.png', src_image=src_image, m_style=6,edit_latent=edit_latents[-1])
+                      if edit_latents is not None:
+                          pose_aligned_latent = edit_latents[-1]
+                          
+                      #Align target
+                      latent_global,visual_global_list=ref_proxy(target_name+'.png', src_image=src_image, m_style=5,edit_latent=pose_aligned_latent)
+                    
                       #Blending feature
                       blend_source,_, edited_latent = hairstyle_feature_blending_2(generator, seg, src_image, input_mask,latent_bald, latent_global, avg_img)
+                    
                       #Refine blending image
                       target_mask = seg(blend_source)[1]
                       final_image,_,_=refine_proxy(blended_latent=edited_latent, src_image=src_image, ref_img=visual_global_list[-1],target_mask=target_mask)
+                    
                       #Print metric score
                       lpips_score = loss_builder._loss_lpips(src_image, final_image).item()
                       ssim_score = calculate_ssim_score_skimage(src_image,final_image)
                       img_output = Image.fromarray(process_display_input(final_image))
                       psnr_score = psnr(img_output, src_pil)
                       print(f'LPIPS score: {lpips_score} \t SSIM score: {ssim_score} \t PSNR score: {psnr_score}')
+                    
                       #save metric as format: source_name, target_name, lpips_score, ssim_score
                       csv_writer.writerow([src_name, target_name, lpips_score, ssim_score, psnr_score])
+                    
                       #Save output image
                       im_path = os.path.join(args.save_output_dir, f'{src_name}_{target_name}_refine.png')
                       img_output.save(im_path)
