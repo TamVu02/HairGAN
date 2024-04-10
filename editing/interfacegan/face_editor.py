@@ -48,6 +48,7 @@ class FaceEditor:
             print(f'Initial keypoint difference: {initial_diff}')
             if initial_diff < 0.005:
                 return None, None
+        edit_images, edit_latents = None, None
             
         if factor_range is not None:  # Apply a range of editing factors. for example, (-5, 5)
             for f in range(*factor_range):
@@ -58,6 +59,7 @@ class FaceEditor:
                 if direction=='pose':
                   cur_diff_score = self.cal_pose_diff(kp_source, edit_image, 'cuda')
                   if cur_diff_score < initial_diff:
+                    print(f'Current updated keypoint difference: {cur_diff_score}')
                     edit_images.append(edit_image)
                     edit_latents.append(edit_latent)
                     initial_diff = cur_diff_score
