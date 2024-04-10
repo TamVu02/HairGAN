@@ -35,7 +35,7 @@ class FaceEditor:
         edit_latents = []
         edit_images = []
         direction_ = self.interfacegan_directions[direction]
-        diff_score=100000000
+        initial_diff=100000000
                  
         if direction=='pose':
           kp_source = self.get_kp_extractor(src_image).detach().cpu().numpy()
@@ -45,6 +45,7 @@ class FaceEditor:
                                                    apply_user_transformations,
                                                    user_transforms)
             initial_diff = self.cal_pose_diff(kp_source, ref_image, 'cuda')
+            print(f'Initial keypoint difference: {initial_diff}')
             if initial_diff < 0.005:
                 return None, None
             
@@ -56,10 +57,10 @@ class FaceEditor:
                                                                      user_transforms)
                 if direction=='pose':
                   cur_diff_score = self.cal_pose_diff(kp_source, edit_image, 'cuda')
-                  if cur_diff_score < diff_score:
+                  if cur_diff_score < initial_diff:
                     edit_images.append(edit_image)
                     edit_latents.append(edit_latent)
-                    diff_score = cur_diff_score
+                    initial_diff = cur_diff_score
                 else:
                   edit_latents.append(edit_latent)
                   edit_images.append(edit_image)
