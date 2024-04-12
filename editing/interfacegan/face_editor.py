@@ -48,6 +48,8 @@ class FaceEditor:
             print(f'Initial keypoint difference: {initial_diff}')
             if initial_diff < 0.005:
                 return None, None
+            else:
+                edit_latents.append(latents)
             
         if factor_range is not None:  # Apply a range of editing factors. for example, (-5, 5)
             for f in range(*factor_range):
