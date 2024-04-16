@@ -4,7 +4,7 @@
 [Nguyen Minh Tuan](https://github.com/MinhTuan0510),
 [Chu Quang Linh](https://github.com/linhchu1),
 
-![Example result](assets/eg_result.png)
+![Example result](assets/quantitve_result.png)
 
 >  **Abstract** Past studies point that although recent methods have notably enhanced the intricacies of hair depiction, they frequently yield sub-optimal outputs when the pose of
 the source image diverges substantially from that of the reference hair image.To address this primary challenge, our focus is to devise an high-performing
@@ -12,6 +12,7 @@ method for altering hairstyles given in source image and reference image for inp
 The methodology involves generating a latent vector representation of input source image using the StyleGAN3 encoder, optimizing the latent space, employing InterfaceGAN for hair and pose manipulation,
 blending and applying StyleGAN3 decoder to generate a new version, refining hair and facial features of this version in final step. Experimental results demonstrate
 the effectiveness of the proposed approach in achieving desired editing outcomes.
+![Overview of HairGAN](assets/HairGAN_Structure.jpg)
 
 ## Installation dependencies
 ```
