@@ -99,7 +99,7 @@ def main(args):
                                         apply_user_transformations=False)
             latent_bald=edit_latents[-1].unsqueeze(0)
 
-            #Retrieve 3 random image in image_list
+            #target image list
             target_img_list=['06853','06845']
             
             for target_name in target_img_list:
