@@ -13,7 +13,6 @@ The methodology involves generating a latent vector representation of input sour
 blending and applying StyleGAN3 decoder to generate a new version, refining hair and facial features of this version in final step. Experimental results demonstrate
 the effectiveness of the proposed approach in achieving desired editing outcomes.
 > 
-![Overview of HairGAN](assets/HairGAN_Structure .jpg)
 
 ## Installation dependencies
 ```
