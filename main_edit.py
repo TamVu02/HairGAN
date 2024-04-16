@@ -112,9 +112,9 @@ def main(args):
                       else:
                         ref_latent = torch.from_numpy(np.load(f'{opts.latent_dir}/{target_name}.npy')).cuda()
                           
-                      #Align pose target image follow source pose
+                      #Pose editing on target image to follow source pose
                       print(f"Performing edit for {edit_direction[1]}...")
-                      pose_aligned_latent=None
+                      pose_edited_latent=None
                       ref_feat, edit_latents = editor.edit(src_image,
                                         latents=ref_latent,
                                         direction=edit_direction[1],
@@ -122,10 +122,10 @@ def main(args):
                                         user_transforms=None,
                                         apply_user_transformations=False)
                       if edit_latents is not None:
-                          pose_aligned_latent = edit_latents[-1]
+                          pose_edited_latent = edit_latents[-1]
                           
                       #Align target
-                      latent_global,visual_global_list=ref_proxy(target_name+'.png', src_image=src_image, m_style=5,edit_latent=pose_aligned_latent)
+                      latent_global,visual_global_list=ref_proxy(target_name+'.png', src_image=src_image, m_style=5,edit_latent=pose_edited_latent)
                     
                       #Blending feature
                       blend_source,_, edited_latent = hairstyle_feature_blending_2(generator, seg, src_image, input_mask,latent_bald, latent_global, avg_img)
