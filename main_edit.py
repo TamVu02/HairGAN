@@ -100,9 +100,9 @@ def main(args):
             latent_bald=edit_latents[-1].unsqueeze(0)
 
             #target image list
-            target_img_list=['06853','06845']
+            #target_img_list=['06853','06845']
             
-            for target_name in target_img_list:
+            for target_name in args.target_list:
                 if os.path.isfile(os.path.join(opts.src_img_dir,f'{target_name}.png')):
                       print(f"\n==Performing edit source image on target image {target_name}.png")
                       
@@ -159,6 +159,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--save_output_dir', type=str ,default='/content/drive/MyDrive/HairGAN/Final_HairGAN/output_img/refine_2',help='directory for saving images after blending')
     parser.add_argument('--img_list', type=str,nargs='+',help='image list eg: 00004 00006 00131 03177')
+    parser.add_argument('--target_list', type=str,nargs='+',help='image list eg: 00004 00006 00131 03177')
     parser.add_argument('--output_result', type=str, default='/content/drive/MyDrive/HairGAN/Final_HairGAN/output_img/result_metric_refine.csv', help='csv file for saving metric result')
 
     
