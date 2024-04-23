@@ -27,5 +27,5 @@ the effectiveness of the proposed approach in achieving desired editing outcomes
 ## Getting Started  
 Produce the results:
 ```
-!python main_edit.py --img_list 06836 06838 06845 06853 06854
+!python main_edit.py --img_list 07080 07751 --target_list 07845 07154
 ```
